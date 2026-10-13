@@ -1,0 +1,14 @@
+alembic==1.20.0
+fastapi==0.141.1
+httpx==0.28.1
+psycopg2-binary==2.9.13
+pydantic==2.13.5
+pydantic-settings==2.15.0
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-mock==3.15.1
+python-dotenv==1.2.3
+requests==2.34.2
+responses==0.26.3
+SQLAlchemy==2.1.4
+uvicorn==0.53.0

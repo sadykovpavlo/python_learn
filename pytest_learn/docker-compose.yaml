@@ -1,0 +1,16 @@
+services:
+  postgres_test:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_test:/var/lib/postgresql/data/:rw
+    ports:
+      - "6454:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  
+volumes:
+  postgres_test:
+    
+    
+  
