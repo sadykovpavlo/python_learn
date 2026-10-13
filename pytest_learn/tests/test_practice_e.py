@@ -39,7 +39,6 @@ def test_unique_tags_negative():
 @pytest.mark.parametrize("entered_object, expected",[
     pytest.param([{"name": "Alice", "status": "active"}, {"name": "Bob", "status": "active"}, {"name": "Jemes", "status": "deactivate"}], "active", id="positive entered valid dict 3 odbjects"),
     pytest.param([{"name": "Jemes", "status": "deactivate"}], "deactivate", id="positive entered valid dict 1 odbjects"),
-    pytest.param([], "", id="edge empty list expected result = empty str"),
     pytest.param([{"name": "Alice", "status": "active"}, {"name": "Bob", "status": "active"}], "active", id="edge same status")
 
 
@@ -51,7 +50,7 @@ def test_most_common_status(entered_object, expected):
 
 @pytest.mark.parametrize("entered_object, exeption", [
     pytest.param(1, TypeError,  id="negative TypeError expected"),
-    pytest.param([], IndexError, id="negative IndexError expected")
+    pytest.param([], IndexError, id="negative IndexError expected"),
 ])
 def test_negative_most_coomon_status(entered_object, exeption):
     with pytest.raises(exeption):

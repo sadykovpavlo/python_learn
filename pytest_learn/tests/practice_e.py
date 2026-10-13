@@ -16,8 +16,10 @@ def unique_tags_short(raws: list[str]) -> list[str]:
 some_dict = [{"name": "Alice", "status": "active" }, {"name": "Bob", "status": "active" }, {"name": "James", "status": "anavalible" }]
 
 def most_common_status(tickets: list[dict]) -> str:
-   return Counter(s['status'] for s in tickets).most_common(1)[0][0]
-   
+   try: 
+      return Counter(s['status'] for s in tickets).most_common(1)[0][0]
+   except IndexError:
+      raise IndexError
 
 paid_orders = [{"status": "refused", "item": "scooter"}, {"status": "paid", "item": "scooter"}, {"status": "paid", "item": "scooter"}, {"status": "paid", "item": "scooter"},]
 

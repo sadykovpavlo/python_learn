@@ -1,30 +1,37 @@
 import pytest
+from models import Item
 
 url = '/items'
 
 
-def test_list_items_empty(api_tester):
-    response = api_tester.send_get(url)
+def test_list_items_empty(client):
+    response = client.get(url)
     assert response.status_code == 200
     assert response.json() == {"items": [], "count": 0}
 
 
-def test_create_item_positive(api_tester):
-    response = api_tester.send_post(url, {"name": "milk", "price": 1})
+def test_create_item_positive(client):
+    response = client.post(url, json={"name": "milk", "price": 1})
     assert response.status_code == 201
-    assert response.json() == {"id": 1, "name": "milk", "price": 1}
+    assert response.json() == {"id": response.json()['id'], "name": "milk", "price": 1}
 
 
-def test_get_real_item(api_tester):
-    api_tester.create_seeded_items([{"id": 1, "name": "milk", "price": 1}])
-    result = api_tester.send_get(f'{url}/1')
+def test_get_real_item(client, db_client):
+    test_item = Item(name="milk", price=1)
+    db_client.add(test_item)
+    db_client.flush()
+    item_id = test_item.id
+    result = client.get(f'{url}/{item_id}')
     assert result.status_code == 200
-    assert result.json() == {"id": 1, "name": "milk", "price": 1}
+    assert result.json() == {"id": item_id, "name": "milk", "price": 1}
     
 
-def test_get_unreal_item(api_tester):
-    api_tester.create_seeded_items([{"id": 1, "name": "milk", "price": 1}])
-    result = api_tester.send_get(f'{url}/100')
+def test_get_unreal_item(client, db_client):
+    test_item = Item(name="milk", price=1)
+    db_client.add(test_item)
+    db_client.flush()
+    fake_item_id = test_item.id + 100
+    result = client.get(f'{url}/{fake_item_id}')
     assert result.status_code == 404
     assert result.json() == {'detail': 'item not found'}
          
@@ -35,8 +42,8 @@ def test_get_unreal_item(api_tester):
     pytest.param({"name": "milk"}, id="no pirce income"),
     pytest.param({"name": "x" * 51, "price": 12}, id="51 symbols in the name")
 ])
-def test_create_item_negative(enter, api_tester):
-    result = api_tester.send_post(url, body=enter)
+def test_create_item_negative(enter, client):
+    result = client.post(url, json=enter)
     assert result.status_code == 422
     assert result.json()["detail"][0]["loc"][-1] in ("price", "name")
 
@@ -51,8 +58,12 @@ list_items = [{"id": 1, "name": "bred", "price": 1}, {"id": 2, "name": "milk", "
     pytest.param(15, {"items": [{"id": 3, "name": "orange", "price": 15}], "count": 1}, id="filter min price 15 exp 1 items"),
     pytest.param(16, {"items": [], "count": 0}, id="filter min price 16 exp 0 items"),
 ])
-def test_get_items_filter(api_tester, min_price, exp):
-    api_tester.create_seeded_items(list_items)
-    result = api_tester.send_get(url, f'min_price={min_price}')
+def test_get_items_filter(client, db_client, min_price, exp):
+    # api_tester.create_seeded_items(list_items)
+    for items in list_items:
+        test_item = Item(id=items['id'], name=items['name'], price=items['price'])
+        db_client.add(test_item)
+    db_client.flush()
+    result = client.get(f'{url}?min_price={min_price}')
     assert result.status_code == 200
     assert result.json() == exp
